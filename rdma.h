@@ -357,10 +357,8 @@ class RDMA_Manager{
 //    printf("Serialized data size: %zu", size_dummy);
 //    client_save_serialized_data(*db_name_, buff, size_dummy, log_type, nullptr);}
   //Allocate an empty remote SST, return the index for the memory slot
-  void Allocate_Remote_RDMA_Slot(const std::string &file_name,
-                                 SST_Metadata*& sst_meta);
-  void Allocate_Local_RDMA_Slot(ibv_mr*& mr_input, ibv_mr*& map_pointer,
-                                std::string pool_name);
+  void Allocate_Remote_RDMA_Slot(ibv_mr *&remote_mr);
+  void Allocate_Local_RDMA_Slot(ibv_mr *&mr_input, std::string pool_name);
   // this function will determine whether the pointer is with in the registered memory
   bool CheckInsideLocalBuff(void* p, std::_Rb_tree_iterator<std::pair<void * const, In_Use_Array>>& mr_iter,
                             std::map<void*, In_Use_Array>* Bitmap);
@@ -440,5 +438,7 @@ class RDMA_Manager{
 
   int post_receive(ibv_mr** mr_list, size_t sge_size, std::string qp_id);
   int post_send(ibv_mr** mr_list, size_t sge_size, std::string qp_id);
+
+    bool Deallocate_Remote_RDMA_Slot(void *p);
 };
 #endif

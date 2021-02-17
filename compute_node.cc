@@ -17,18 +17,7 @@ void client_thread(RDMA_Manager* rdma_manager){
   char *msg = static_cast<char *>(rdma_manager->local_mem_pool[0]->addr);
   strcpy(msg, "message from computing node");
   int msg_size = sizeof("message from computing node");
-//  rdma_manager->RDMA_Write(rdma_manager->remote_mem_pool[0], &mem_pool_table[0],
-//                           msg_size, *thread_id);
-//
-//  rdma_manager->RDMA_Read(rdma_manager->remote_mem_pool[0], &mem_pool_table[1],
-//                          msg_size, *thread_id);
-//  ibv_wc* wc = new ibv_wc();
-//
-//    rdma_manager->poll_completion(wc, 2, thread_id);
-//    if (wc->status != 0){
-//      fprintf(stderr, "Work completion status is %d \n", wc->status);
-//      fprintf(stderr, "Work completion opcode is %d \n", wc->opcode);
-//    }
+
 
 
   std::cout << "write buffer: " << (char*)mem_pool_table[0].addr << std::endl;
@@ -50,28 +39,26 @@ int main()
 
 
   auto Remote_Bitmap = new std::map<void*, In_Use_Array>;
-//  ibv_mr inuse_mr;
-//  inuse_mr.length = 559;
-//  In_Use_Array inuse_a(100, 1000, &inuse_mr);
-//  Remote_Bitmap->insert({nullptr, inuse_a});
-  size_t table_size = 8*1024*1024;
+
+  size_t table_size = 4*1024;
   RDMA_Manager* rdma_manager = new RDMA_Manager(
           config, Remote_Bitmap, table_size);
-  rdma_manager->Mempool_initialize(std::string("read"), 8*1024);
-  rdma_manager->Mempool_initialize(std::string("write"), 1024*1024);
+  rdma_manager->Mempool_initialize(std::string("block"), 4*1024);
+
 
   rdma_manager->Client_Set_Up_Resources();
-
-  ibv_mr* mr = new ibv_mr;
-  In_Use_Array in_use(10,4096,mr);
-  for (int i = 0; i<5; i++)
-    in_use.allocate_memory_slot();
-  Remote_Bitmap->insert({static_cast<void*>(&rdma_manager), in_use});
-  size_t buff_size = 1024*1024*1014;
-  char* test_buff = static_cast<char*>(malloc(buff_size));
-  int mr_flags =
-      IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_READ | IBV_ACCESS_REMOTE_WRITE;
-
+    ibv_mr* send_mr;
+    ibv_mr* receive_mr;
+    ibv_mr* remote_mr;
+    std::string dummyfile("dummy");
+    rdma_manager->Allocate_Local_RDMA_Slot(send_mr, "block");
+    rdma_manager->Allocate_Local_RDMA_Slot(receive_mr, "block");
+    rdma_manager->Allocate_Remote_RDMA_Slot(remote_mr);
+    memcpy((void *) "RDMA MESSAGE", send_mr->addr, 13);
+    // q_id is "" then use the thread local qp.
+    rdma_manager->RDMA_Write(remote_mr, send_mr, 13, "",IBV_SEND_SIGNALED, 1);
+    rdma_manager->RDMA_Read(remote_mr, receive_mr, 13, "",IBV_SEND_SIGNALED, 1);
+    printf((char*)receive_mr->addr);
 
 
   return 0;
