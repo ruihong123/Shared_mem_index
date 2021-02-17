@@ -54,10 +54,13 @@ int main()
     rdma_manager->Allocate_Local_RDMA_Slot(send_mr, "block");
     rdma_manager->Allocate_Local_RDMA_Slot(receive_mr, "block");
     rdma_manager->Allocate_Remote_RDMA_Slot(remote_mr);
-    memcpy((void *) "RDMA MESSAGE", send_mr->addr, 13);
+    std::string str = "RDMA MESSAGE";
+//    memcpy(static_cast<char*>(res->send_buf)+db_name.size(), "\0", 1);
+    memcpy(send_mr->addr, str.c_str(), str.size());
+    memset((char*)send_mr->addr+str.size(), 0,1);
     // q_id is "" then use the thread local qp.
-    rdma_manager->RDMA_Write(remote_mr, send_mr, 13, "",IBV_SEND_SIGNALED, 1);
-    rdma_manager->RDMA_Read(remote_mr, receive_mr, 13, "",IBV_SEND_SIGNALED, 1);
+    rdma_manager->RDMA_Write(remote_mr, send_mr, str.size()+1, "",IBV_SEND_SIGNALED, 1);
+    rdma_manager->RDMA_Read(remote_mr, receive_mr, str.size()+1, "",IBV_SEND_SIGNALED, 1);
     printf((char*)receive_mr->addr);
 
 
