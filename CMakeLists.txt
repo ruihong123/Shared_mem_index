@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.8)
 
 project(Remote_Btree)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -pthread -W -Wextra -Wall")
