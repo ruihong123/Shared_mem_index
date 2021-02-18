@@ -298,7 +298,7 @@ class RDMA_Manager{
 //        }
 //    };
  public:
-  RDMA_Manager(config_t config, std::map<void *, In_Use_Array> *Remote_Bitmap, size_t table_size);
+  RDMA_Manager(config_t config, size_t remote_block_size);
 //  RDMA_Manager(config_t config) : rdma_config(config){
 //    res = new resources();
 //    res->sock = -1;
@@ -347,7 +347,8 @@ class RDMA_Manager{
   bool Deallocate_Local_RDMA_Slot(ibv_mr* mr, ibv_mr* map_pointer,
                                   std::string buffer_type);
   bool Deallocate_Local_RDMA_Slot(void* p, std::string buff_type);
-  bool Deallocate_Remote_RDMA_Slot(SST_Metadata* sst_meta);
+//  bool Deallocate_Remote_RDMA_Slot(SST_Metadata* sst_meta);
+  bool Deallocate_Remote_RDMA_Slot(void *p);
 //  void fs_meta_save(){
 //    std::shared_lock<std::shared_mutex> read_lock(*fs_mutex_);
 //    //TODO: make the buff size dynamically changed, otherwise there will be bug of buffer overflow.
@@ -377,7 +378,7 @@ class RDMA_Manager{
   resources* res = nullptr;
   std::vector<ibv_mr*> remote_mem_pool; /* a vector for all the remote memory regions*/
   std::vector<ibv_mr*> local_mem_pool; /* a vector for all the local memory regions.*/
-  std::map<void*, In_Use_Array>* Remote_Mem_Bitmap = nullptr;
+  std::map<void*, In_Use_Array>* Remote_Mem_Bitmap;
 
 //  std::shared_mutex remote_pool_mutex;
 //  std::map<void*, In_Use_Array>* Write_Local_Mem_Bitmap = nullptr;
@@ -439,6 +440,6 @@ class RDMA_Manager{
   int post_receive(ibv_mr** mr_list, size_t sge_size, std::string qp_id);
   int post_send(ibv_mr** mr_list, size_t sge_size, std::string qp_id);
 
-    bool Deallocate_Remote_RDMA_Slot(void *p);
+
 };
 #endif

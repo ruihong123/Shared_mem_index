@@ -33,8 +33,8 @@ void UnrefHandle_cq(void* ptr){
 * Description
 * Initialize the resource for RDMA.
 ******************************************************************************/
-RDMA_Manager::RDMA_Manager(config_t config, std::map<void *, In_Use_Array> *Remote_Bitmap, size_t table_size)
-    : Table_Size(table_size),
+RDMA_Manager::RDMA_Manager(config_t config, size_t remote_block_size)
+    : Table_Size(remote_block_size),
 //      t_local_1(new ThreadLocalPtr(&UnrefHandle_rdma)),
       qp_local(new ThreadLocalPtr(&UnrefHandle_qp)),
       cq_local(new ThreadLocalPtr(&UnrefHandle_cq)),
@@ -52,7 +52,7 @@ RDMA_Manager::RDMA_Manager(config_t config, std::map<void *, In_Use_Array> *Remo
 //  log_image_mr.reset(ibv_reg_mr(res->pd, buff, 1024*1024, mr_flags));
 
   //  res->sock = -1;
-  Remote_Mem_Bitmap = Remote_Bitmap;
+  Remote_Mem_Bitmap = new std::map<void*, In_Use_Array>;
 //  Write_Local_Mem_Bitmap = Write_Bitmap;
 //  Read_Local_Mem_Bitmap = Read_Bitmap;
 }
@@ -2022,18 +2022,18 @@ bool RDMA_Manager::Deallocate_Remote_RDMA_Slot(void *p) {
     }
     return false;
 }
-bool RDMA_Manager::Deallocate_Remote_RDMA_Slot(SST_Metadata* sst_meta)  {
-
-  int buff_offset = static_cast<char*>(sst_meta->mr->addr) -
-                    static_cast<char*>(sst_meta->map_pointer->addr);
-  assert(buff_offset % Table_Size == 0);
-#ifndef NDEBUG
-//  std::cout <<"Chunk deallocate at" << sst_meta->mr->addr << "index: " << buff_offset/Table_Size << std::endl;
-#endif
-  std::shared_lock<std::shared_mutex> read_lock(local_mem_mutex);
-  return Remote_Mem_Bitmap->at(sst_meta->map_pointer->addr)
-      .deallocate_memory_slot(buff_offset / Table_Size);
-}
+//bool RDMA_Manager::Deallocate_Remote_RDMA_Slot(SST_Metadata* sst_meta)  {
+//
+//  int buff_offset = static_cast<char*>(sst_meta->mr->addr) -
+//                    static_cast<char*>(sst_meta->map_pointer->addr);
+//  assert(buff_offset % Table_Size == 0);
+//#ifndef NDEBUG
+////  std::cout <<"Chunk deallocate at" << sst_meta->mr->addr << "index: " << buff_offset/Table_Size << std::endl;
+//#endif
+//  std::shared_lock<std::shared_mutex> read_lock(local_mem_mutex);
+//  return Remote_Mem_Bitmap->at(sst_meta->map_pointer->addr)
+//      .deallocate_memory_slot(buff_offset / Table_Size);
+//}
 
 bool RDMA_Manager::CheckInsideLocalBuff(
     void* p, std::_Rb_tree_iterator<std::pair<void * const, In_Use_Array>>& mr_iter,

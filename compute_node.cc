@@ -62,40 +62,44 @@ int main()
       1, /* gid_idx */
       4*10*1024*1024 /*initial local buffer size*/
   };
-
-
-  auto Remote_Bitmap = new std::map<void*, In_Use_Array>;
-
-  size_t table_size = 4*1024;
-  RDMA_Manager* rdma_manager = new RDMA_Manager(
-          config, Remote_Bitmap, table_size);
+  size_t remote_block_size = 4*1024;
+  //Initialize the rdma manager, the remote block size will be configured in the beggining.
+  // remote block size will always be the same.
+  RDMA_Manager* rdma_manager = new RDMA_Manager(config, remote_block_size);
+  // Unlike the remote block size, the local block size is adjustable, and there could be different
+  // local memory pool with different size. each size of memory pool will have an ID below is "4k"
   rdma_manager->Mempool_initialize(std::string("4k"), 4*1024);
 
-
+    //client will try to connect to the remote memory, now there is only one remote memory.
   rdma_manager->Client_Set_Up_Resources();
+    //below we will allocate three memory blocks, local send, local receive and remote blocks.
     ibv_mr* send_mr;
     ibv_mr* receive_mr;
     ibv_mr* remote_mr;
-    std::string dummyfile("dummy");
+    //these two lines of code will allocate block of 4096 from 4k memory pool, there are also Deallocate functions
+    // which is not shown here, you are suppose to deallocate the buffer for garbage collection.
     rdma_manager->Allocate_Local_RDMA_Slot(send_mr, "4k");
     rdma_manager->Allocate_Local_RDMA_Slot(receive_mr, "4k");
+    // this line of code will allocate a remote memory block from the remote side through RDMA rpc.
     rdma_manager->Allocate_Remote_RDMA_Slot(remote_mr);
+    // Supposing we will send a string message
     std::string str = "RDMA MESSAGE\n";
-//    memcpy(static_cast<char*>(res->send_buf)+db_name.size(), "\0", 1);
     memcpy(send_mr->addr, str.c_str(), str.size());
     memset((char*)send_mr->addr+str.size(), 0,1);
-    // q_id is "" then use the thread local qp.
+    // for RDMA send and receive there will be five parameters, the first and second parameters are the address for the
+    // local and remote buffer
+    // q_id is "", then use the thread local qp.
     rdma_manager->RDMA_Write(remote_mr, send_mr, str.size()+1, "",IBV_SEND_SIGNALED, 1);
     rdma_manager->RDMA_Read(remote_mr, receive_mr, str.size()+1, "",IBV_SEND_SIGNALED, 1);
     printf((char*)receive_mr->addr);
-    printf("multiple threaded test");
 
 
 
+    printf("multiple threaded demo");
     size_t read_block_size;
     std::cout << "block size:\r" << std::endl;
     std::cin >> read_block_size;
-//  table_size = read_block_size+64;
+    //  table_size = read_block_size+64;
     int readorwrite;
     std::cout << "Read or write:\r" << std::endl;//read 0 write anything else
     std::cin >> readorwrite;
@@ -110,7 +114,7 @@ int main()
     long int ends;
     std::thread* thread_object[thread_num];
     for (size_t i = 0; i < thread_num; i++){
-//        SST_Metadata* sst_meta;
+    //        SST_Metadata* sst_meta;
 
         for(size_t j= 0; j< 1; j++){
             rdma_manager->Allocate_Remote_RDMA_Slot(RDMA_remote_chunks[i][j]);
@@ -152,5 +156,7 @@ int main()
     std::cout << (ends-starts) << std::endl;
     std::cout << "Size: " << read_block_size << "Bandwidth is " << bandwidth << "MB/s" << std::endl;
     std::cout << "Size: " << read_block_size << "Dummy latency is " << latency << "ns" << std::endl;
+
+
     return 0;
 }
