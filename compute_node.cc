@@ -2,8 +2,8 @@
 #include "rdma.h"
 //global values for the test
 bool test_start = false;
-int thread_ready_num = 0;
-int thread_finish_num = 0;
+size_t thread_ready_num = 0;
+size_t thread_finish_num = 0;
 size_t thread_num;
 std::mutex startmtx;
 std::mutex finishmtx;
@@ -120,7 +120,7 @@ int main()
         }
 
     }
-    for(int i = 0; i < thread_num; i++)
+    for(size_t i = 0; i < thread_num; i++)
     {
 
 
