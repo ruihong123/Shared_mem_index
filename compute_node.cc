@@ -93,6 +93,7 @@ int main()
 
 
     size_t read_block_size;
+    std::cout << "block size:\r" << std::endl;
     std::cin >> read_block_size;
 //  table_size = read_block_size+64;
     int readorwrite;
