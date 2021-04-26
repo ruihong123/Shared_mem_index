@@ -62,7 +62,7 @@ int main()
       1, /* gid_idx */
       4*10*1024*1024 /*initial local buffer size*/
   };
-  size_t remote_block_size = 4*1024;
+  size_t remote_block_size = 1024*1024;
   //Initialize the rdma manager, the remote block size will be configured in the beggining.
   // remote block size will always be the same.
   RDMA_Manager* rdma_manager = new RDMA_Manager(config, remote_block_size);
