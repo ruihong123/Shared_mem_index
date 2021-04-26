@@ -35,7 +35,8 @@
 #include <iostream>
 #include <map>
 #include <vector>
-#include <util/thread_local.h>
+#include <thread_local.h>
+//#include <util/thread_local.h>
 //#ifdef __cplusplus
 //extern "C" { //only need to export C interface if
 //// used by C++ source code
@@ -248,31 +249,31 @@ struct IBV_Deleter {
   }
 };
 
-//class QP_Deleter{
-//public:
-//    void operator()(ibv_qp* ptr){
-//        if (ptr == nullptr)
-//            return;
-//        else if (ibv_destroy_qp(static_cast<ibv_qp*>(ptr))) {
-//            fprintf(stderr, "Thread local qp failed to destroy QP\n");
-//        }
-//        else{
-//            printf("thread local qp destroy successfully!");
-//        }
-//    }
-//};
-//class CQ_Deleter {
-//public:
-//    void operator()(ibv_cq* ptr) {
-//        if (ptr == nullptr)
-//            return;
-//        if (ibv_destroy_cq(static_cast<ibv_cq *>(ptr))) {
-//            fprintf(stderr, "Thread local cq failed to destroy QP\n");
-//        } else {
-//            printf("thread local cq destroy successfully!");
-//        }
-//    }
-//};
+class QP_Deleter{
+public:
+    void operator()(ibv_qp* ptr){
+        if (ptr == nullptr)
+            return;
+        else if (ibv_destroy_qp(static_cast<ibv_qp*>(ptr))) {
+            fprintf(stderr, "Thread local qp failed to destroy QP\n");
+        }
+        else{
+            printf("thread local qp destroy successfully!");
+        }
+    }
+};
+class CQ_Deleter {
+public:
+    void operator()(ibv_cq* ptr) {
+        if (ptr == nullptr)
+            return;
+        if (ibv_destroy_cq(static_cast<ibv_cq *>(ptr))) {
+            fprintf(stderr, "Thread local cq failed to destroy QP\n");
+        } else {
+            printf("thread local cq destroy successfully!");
+        }
+    }
+};
 //QP_Deleter qpdeleter;
 //CQ_Deleter cqdeleter;
 /* structure of test parameters */

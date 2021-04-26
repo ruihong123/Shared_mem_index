@@ -31,17 +31,17 @@ client_thread(RDMA_Manager *rdma_manager, int iteration, ibv_mr **local_mr_point
             int j = (i + 1) % 10;
             if (r_w)
                 rdma_manager->RDMA_Write(remote_mr[j], local_mr_pointer[j],
-                                         msg_size, "", IBV_SEND_SIGNALED, 1);
+                                         msg_size, "", IBV_SEND_SIGNALED, 10);
             else
                 rdma_manager->RDMA_Read(remote_mr[j], local_mr_pointer[j],
-                                        msg_size, "", IBV_SEND_SIGNALED, 1);
+                                        msg_size, "", IBV_SEND_SIGNALED, 10);
         } else {
             if (r_w)
                 rdma_manager->RDMA_Write(remote_mr[0], local_mr_pointer[0],
-                                         msg_size, "", IBV_SEND_SIGNALED, 1);
+                                         msg_size, "", IBV_SEND_SIGNALED, 0);
             else
                 rdma_manager->RDMA_Read(remote_mr[0]    , local_mr_pointer[0],
-                                        msg_size, "", IBV_SEND_SIGNALED, 1);
+                                        msg_size, "", IBV_SEND_SIGNALED, 0);
         }
 
     }
@@ -76,7 +76,7 @@ int main()
     ibv_mr* send_mr;
     ibv_mr* receive_mr;
     ibv_mr* remote_mr;
-    //these two lines of code will allocate block of 4096 from 4k memory pool, there are also Deallocate functions
+    // these two lines of code will allocate block of 4096 from 4k memory pool, there are also Deallocate functions
     // which is not shown here, you are suppose to deallocate the buffer for garbage collection.
     rdma_manager->Allocate_Local_RDMA_Slot(send_mr, "4k");
     rdma_manager->Allocate_Local_RDMA_Slot(receive_mr, "4k");
