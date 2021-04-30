@@ -97,8 +97,9 @@ int main()
 
     printf("multiple threaded demo");
     size_t read_block_size;
-    std::cout << "block size:\r" << std::endl;
-    std::cin >> read_block_size;
+//    std::cout << "block size:\r" << std::endl;
+//    std::cin >> read_block_size;
+    read_block_size = 4096;
     //  table_size = read_block_size+64;
     int readorwrite;
     std::cout << "Read or write:\r" << std::endl;//read 0 write anything else
