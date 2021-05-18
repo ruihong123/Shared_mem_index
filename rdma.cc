@@ -641,6 +641,7 @@ void RDMA_Manager::Client_Set_Up_Resources() {
   // int trans_times;
   char temp_char;
   std::string ip_add;
+    printf("Please input the remote memory IP address:");
   std::cin >> ip_add;
   rdma_config.server_name = ip_add.c_str();
   /* if client side */
