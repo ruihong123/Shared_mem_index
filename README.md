@@ -5,5 +5,7 @@
 
 
 Compute node side: ./Demo_compute
+
 Memory node side: ./Demo_memory
+
 Then follow the guide of the screen
