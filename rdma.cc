@@ -2003,25 +2003,30 @@ bool RDMA_Manager::Deallocate_Local_RDMA_Slot(void* p, std::string buff_type) {
   return false;
 }
 bool RDMA_Manager::Deallocate_Remote_RDMA_Slot(void *p) {
-    std::shared_lock<std::shared_mutex> read_lock(local_mem_mutex);
+    std::shared_lock<std::shared_mutex> read_lock(remote_mem_mutex);
     std::map<void*, In_Use_Array>* Bitmap;
     Bitmap = Remote_Mem_Bitmap;
     auto mr_iter = Bitmap->upper_bound(p);
-    if(mr_iter == Bitmap->begin()){
+    if (mr_iter == Bitmap->begin()) {
         return false;
-    }else if (mr_iter == Bitmap->end()){
+    } else if (mr_iter == Bitmap->end()) {
         mr_iter--;
-        size_t buff_offset = static_cast<char*>(p) - static_cast<char*>(mr_iter->first);
-//      assert(buff_offset>=0);
+        size_t buff_offset =
+                static_cast<char*>(p) - static_cast<char*>(mr_iter->first);
+        //      assert(buff_offset>=0);
         if (buff_offset < mr_iter->second.get_mr_ori()->length)
-            return mr_iter->second.deallocate_memory_slot(buff_offset / mr_iter->second.get_chunk_size());
+            return mr_iter->second.deallocate_memory_slot(
+                    buff_offset / mr_iter->second.get_chunk_size());
         else
             return false;
-    }else{
-        size_t buff_offset = static_cast<char*>(p) - static_cast<char*>(mr_iter->first);
-//      assert(buff_offset>=0);
+    } else {
+        mr_iter--;
+        size_t buff_offset =
+                static_cast<char*>(p) - static_cast<char*>(mr_iter->first);
+        //      assert(buff_offset>=0);
         if (buff_offset < mr_iter->second.get_mr_ori()->length)
-            return mr_iter->second.deallocate_memory_slot(buff_offset / mr_iter->second.get_chunk_size());
+            return mr_iter->second.deallocate_memory_slot(
+                    buff_offset / mr_iter->second.get_chunk_size());
     }
     return false;
 }
